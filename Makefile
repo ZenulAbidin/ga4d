@@ -30,6 +30,7 @@ ifeq ($(SYSTEM_GLFW),yes)
 GLFW_CFLAGS := $(shell $(PKG_CONFIG) --cflags glfw3)
 GLFW_LIBS := $(shell $(PKG_CONFIG) --libs glfw3)
 GLFW_TARGET :=
+GLFW_HEADER_TARGET :=
 else
 GLFW_CFLAGS := -I$(GLFW_DIR)/include
 ifeq ($(VENDORED_WAYLAND),yes)
@@ -42,6 +43,7 @@ endif
 GLFW_LIBS := $(GLFW_LIB) -lGL -lm -ldl -lpthread -lX11 -lXrandr -lXi -lXxf86vm -lXcursor -lXinerama
 GLFW_LIBS += $(GLFW_WAYLAND_LIBS)
 GLFW_TARGET := $(GLFW_LIB)
+GLFW_HEADER_TARGET := $(GLFW_DIR)/CMakeLists.txt
 endif
 
 CPPFLAGS += $(GLFW_CFLAGS)
@@ -55,7 +57,7 @@ $(BIN_DIR)/$(APP): $(OBJ) $(GLFW_TARGET)
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDLIBS)
 
-$(OBJ_DIR)/%.o: src/%.c
+$(OBJ_DIR)/%.o: src/%.c $(GLFW_HEADER_TARGET)
 	@mkdir -p $(OBJ_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
 
