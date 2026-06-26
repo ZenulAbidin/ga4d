@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-void build_shapes(Shape shapes[3]);
+void build_shapes(Shape shapes[SHAPE_COUNT]);
 
 #endif

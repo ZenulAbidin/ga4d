@@ -3,12 +3,15 @@
 
 #define GA4D_PI 3.14159265358979323846f
 #define GA4D_EPS 0.00001f
+#define GA4D_VERSION "1.1.0"
 
-#define MAX_VERTICES 64
-#define MAX_EDGES 384
-#define MAX_FACES 128
+#define MAX_VERTICES 4096
+#define MAX_EDGES 16000
+#define MAX_FACES 12000
 #define MAX_FACE_VERTS 4
 #define MAX_SLICE_POINTS 8
+#define GA4D_PATH_MAX 512
+#define GA4D_STATUS_MAX 256
 
 typedef struct {
     float x;
@@ -55,6 +58,10 @@ enum {
     SHAPE_CELL16,
     SHAPE_SIMPLEX5,
     SHAPE_HYPERSPHERE,
+    SHAPE_ICON_ARROW,
+    SHAPE_ICON_STAR,
+    SHAPE_PNG_ICON,
+    SHAPE_HOUSE_W,
     SHAPE_COUNT
 };
 

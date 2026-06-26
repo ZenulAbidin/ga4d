@@ -13,7 +13,14 @@ const char *ga4d_view_names[VIEW_COUNT] = {
 };
 
 const char *ga4d_object_names[SHAPE_COUNT] = {
-    "TESSERACT", "16-CELL", "5-CELL", "HYPERSPHERE"
+    "TESSERACT",
+    "16-CELL",
+    "5-CELL",
+    "HYPERSPHERE",
+    "ICON ARROW-W",
+    "ICON STAR-W",
+    "PNG ICON-W",
+    "3D HOUSE-W"
 };
 
 const char *ga4d_basis_names[BASIS_COUNT] = {

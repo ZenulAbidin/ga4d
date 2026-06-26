@@ -14,7 +14,7 @@ GIT ?= git
 WARN := -Wall -Wextra -Wpedantic
 CSTD := -std=c99
 OPT ?= -O2 -g
-CPPFLAGS += -Isrc
+CPPFLAGS += -Isrc -Ivendor/stb
 CFLAGS += $(CSTD) $(WARN) $(OPT)
 
 GLFW_DIR := vendor/glfw
@@ -106,6 +106,7 @@ headless-smoke: $(BIN_DIR)/$(APP)
 print-deps:
 	@echo "SYSTEM_GLFW=$(SYSTEM_GLFW)"
 	@echo "VENDORED_WAYLAND=$(VENDORED_WAYLAND)"
+	@echo "STB_IMAGE=vendor/stb/stb_image.h"
 	@echo "GLFW_CFLAGS=$(GLFW_CFLAGS)"
 	@echo "GLFW_LIBS=$(GLFW_LIBS)"
 

@@ -63,7 +63,8 @@ void update_title(App *app)
     char title[256];
 
     snprintf(title, sizeof(title),
-             "ga4d - %s / %s / %s - H toggles help",
+             "ga4d %s - %s / %s / %s - H toggles help",
+             GA4D_VERSION,
              ga4d_object_names[app->object],
              ga4d_view_names[app->view],
              ga4d_basis_names[app->basis_mode]);
@@ -146,6 +147,18 @@ void process_input(App *app, float dt)
     }
     if (key_once(app, GLFW_KEY_F5)) {
         app_apply_preset(app, 5);
+        update_title(app);
+    }
+    if (key_once(app, GLFW_KEY_F6)) {
+        app_apply_preset(app, 6);
+        update_title(app);
+    }
+    if (key_once(app, GLFW_KEY_F7)) {
+        app_apply_preset(app, 7);
+        update_title(app);
+    }
+    if (key_once(app, GLFW_KEY_F8)) {
+        app_apply_preset(app, 8);
         update_title(app);
     }
 

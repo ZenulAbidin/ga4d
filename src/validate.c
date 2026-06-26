@@ -282,7 +282,7 @@ int run_visual_validation(void)
 
     app_defaults(&app);
 
-    for (preset = 1; preset <= 5; ++preset) {
+    for (preset = 1; preset <= 8; ++preset) {
         char label[64];
         app_apply_preset(&app, preset);
         snprintf(label, sizeof(label), "preset %d", preset);

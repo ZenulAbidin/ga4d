@@ -130,8 +130,11 @@ static int smoke_stats_passed(const SmokeStats *stats)
 
 static void print_usage(const char *argv0)
 {
-    printf("usage: %s [--self-test] [--validate-visuals] [--smoke-frames N] [--headless-smoke N] [--help]\n", argv0);
+    printf("usage: %s [--icon FILE.PNG] [--probe-icon FILE.PNG] [--self-test] [--validate-visuals] [--smoke-frames N] [--headless-smoke N] [--help]\n", argv0);
     printf("\n");
+    printf("  --icon FILE.PNG   Load a PNG icon and extrude its silhouette through w.\n");
+    printf("  --probe-icon FILE.PNG\n");
+    printf("                    Load a PNG icon, report mesh size, and exit without OpenGL.\n");
     printf("Interactive controls are shown in the viewer overlay.\n");
 }
 
@@ -155,6 +158,34 @@ static int test_topology(const App *app)
         app->shapes[SHAPE_SIMPLEX5].edge_count != 10 ||
         app->shapes[SHAPE_SIMPLEX5].face_count != 10) {
         fprintf(stderr, "self-test: 5-cell topology mismatch\n");
+        return 0;
+    }
+
+    if (app->shapes[SHAPE_ICON_ARROW].vertex_count < 8 ||
+        app->shapes[SHAPE_ICON_ARROW].edge_count < 8 ||
+        app->shapes[SHAPE_ICON_ARROW].face_count < 4) {
+        fprintf(stderr, "self-test: arrow extrusion topology mismatch\n");
+        return 0;
+    }
+
+    if (app->shapes[SHAPE_ICON_STAR].vertex_count < 8 ||
+        app->shapes[SHAPE_ICON_STAR].edge_count < 8 ||
+        app->shapes[SHAPE_ICON_STAR].face_count < 4) {
+        fprintf(stderr, "self-test: star extrusion topology mismatch\n");
+        return 0;
+    }
+
+    if (app->shapes[SHAPE_PNG_ICON].vertex_count < 8 ||
+        app->shapes[SHAPE_PNG_ICON].edge_count < 8 ||
+        app->shapes[SHAPE_PNG_ICON].face_count < 4) {
+        fprintf(stderr, "self-test: PNG sample extrusion topology mismatch\n");
+        return 0;
+    }
+
+    if (app->shapes[SHAPE_HOUSE_W].vertex_count < 16 ||
+        app->shapes[SHAPE_HOUSE_W].edge_count < 24 ||
+        app->shapes[SHAPE_HOUSE_W].face_count < 10) {
+        fprintf(stderr, "self-test: 3D house extrusion topology mismatch\n");
         return 0;
     }
 
@@ -234,8 +265,11 @@ static int test_projection(App *app)
     app->coord_angle.e34 = 0.51f;
     app_update_rotor(app);
 
-    for (obj = 0; obj < 3; ++obj) {
+    for (obj = 0; obj < SHAPE_COUNT; ++obj) {
         const Shape *shape = &app->shapes[obj];
+        if (obj == SHAPE_HYPERSPHERE) {
+            continue;
+        }
         for (i = 0; i < shape->vertex_count; ++i) {
             Vec3 out;
             Vec4 p = app_rotate_vec4(app, shape->vertices[i]);
@@ -299,7 +333,72 @@ static int has_arg(int argc, char **argv, const char *name)
     return 0;
 }
 
-static int run_viewer(int smoke_frames, int headless)
+static const char *string_arg(int argc, char **argv, const char *name)
+{
+    int i;
+
+    for (i = 1; i + 1 < argc; ++i) {
+        if (strcmp(argv[i], name) == 0) {
+            return argv[i + 1];
+        }
+    }
+
+    return NULL;
+}
+
+static int args_are_known(int argc, char **argv)
+{
+    int i;
+
+    for (i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "--self-test") == 0 ||
+            strcmp(argv[i], "--validate-visuals") == 0 ||
+            strcmp(argv[i], "--help") == 0 ||
+            strcmp(argv[i], "-h") == 0) {
+            continue;
+        }
+        if (strcmp(argv[i], "--smoke-frames") == 0 ||
+            strcmp(argv[i], "--headless-smoke") == 0 ||
+            strcmp(argv[i], "--icon") == 0 ||
+            strcmp(argv[i], "--probe-icon") == 0) {
+            if (i + 1 >= argc) {
+                fprintf(stderr, "%s requires a value\n", argv[i]);
+                return 0;
+            }
+            i++;
+            continue;
+        }
+        fprintf(stderr, "unknown argument: %s\n", argv[i]);
+        return 0;
+    }
+
+    return 1;
+}
+
+static int probe_icon(const char *path)
+{
+    App app;
+
+    if (!path) {
+        fprintf(stderr, "--probe-icon requires a PNG path\n");
+        return 2;
+    }
+
+    app_defaults(&app);
+    if (!app_load_png_icon(&app, path)) {
+        fprintf(stderr, "%s\n", app.icon_status);
+        return 1;
+    }
+
+    printf("ga4d PNG probe: %s\n", app.icon_status);
+    printf("ga4d PNG mesh: %d vertices, %d edges, %d faces\n",
+           app.shapes[SHAPE_PNG_ICON].vertex_count,
+           app.shapes[SHAPE_PNG_ICON].edge_count,
+           app.shapes[SHAPE_PNG_ICON].face_count);
+    return 0;
+}
+
+static int run_viewer(int smoke_frames, int headless, const char *icon_path)
 {
     App app;
     SmokeStats smoke_stats;
@@ -310,6 +409,13 @@ static int run_viewer(int smoke_frames, int headless)
 
     memset(&smoke_stats, 0, sizeof(smoke_stats));
     app_defaults(&app);
+    if (icon_path) {
+        if (!app_load_png_icon(&app, icon_path)) {
+            fprintf(stderr, "%s\n", app.icon_status);
+            return 1;
+        }
+        app.object = SHAPE_PNG_ICON;
+    }
 
     glfwSetErrorCallback(glfw_error_callback);
 
@@ -387,7 +493,11 @@ static int run_viewer(int smoke_frames, int headless)
     glPointSize(4.0f);
     update_title(&app);
 
-    printf("ga4d controls: H help, Tab object, M view, R basis, Space pause, Esc quit\n");
+    printf("ga4d %s controls: H help, Tab object, M view, R basis, Space pause, Esc quit\n",
+           GA4D_VERSION);
+    if (icon_path) {
+        printf("ga4d PNG icon: %s\n", app.icon_status);
+    }
 
     last_time = glfwGetTime();
     while (!glfwWindowShouldClose(app.window)) {
@@ -449,20 +559,31 @@ int main(int argc, char **argv)
 {
     int smoke_frames;
     int headless_frames;
+    const char *icon_path;
+    const char *probe_path;
 
-    if (argc > 1) {
-        if (strcmp(argv[1], "--self-test") == 0) {
-            return run_self_tests();
-        }
-        if (strcmp(argv[1], "--validate-visuals") == 0) {
-            return run_visual_validation();
-        }
-        if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
-            print_usage(argv[0]);
-            return 0;
-        }
+    if (!args_are_known(argc, argv)) {
+        print_usage(argv[0]);
+        return 2;
     }
 
+    if (has_arg(argc, argv, "--self-test")) {
+        return run_self_tests();
+    }
+    if (has_arg(argc, argv, "--validate-visuals")) {
+        return run_visual_validation();
+    }
+    if (has_arg(argc, argv, "--help") || has_arg(argc, argv, "-h")) {
+        print_usage(argv[0]);
+        return 0;
+    }
+
+    probe_path = string_arg(argc, argv, "--probe-icon");
+    if (probe_path) {
+        return probe_icon(probe_path);
+    }
+
+    icon_path = string_arg(argc, argv, "--icon");
     smoke_frames = parse_frame_arg(argc, argv, "--smoke-frames");
     if (smoke_frames < 0) {
         fprintf(stderr, "--smoke-frames requires a positive frame count\n");
@@ -475,18 +596,12 @@ int main(int argc, char **argv)
     }
 
     if (headless_frames > 0) {
-        return run_viewer(headless_frames, 1);
-    }
-
-    if (argc > 1 && smoke_frames == 0) {
-        fprintf(stderr, "unknown argument: %s\n", argv[1]);
-        print_usage(argv[0]);
-        return 2;
+        return run_viewer(headless_frames, 1, icon_path);
     }
 
     if (has_arg(argc, argv, "--smoke-frames")) {
-        return run_viewer(smoke_frames, 0);
+        return run_viewer(smoke_frames, 0, icon_path);
     }
 
-    return run_viewer(0, 0);
+    return run_viewer(0, 0, icon_path);
 }

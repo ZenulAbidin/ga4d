@@ -1,5 +1,6 @@
 #include "shapes.h"
 
+#include "extrude.h"
 #include "math4d.h"
 
 #include <string.h>
@@ -223,9 +224,13 @@ static void build_simplex5(Shape *shape)
     }
 }
 
-void build_shapes(Shape shapes[3])
+void build_shapes(Shape shapes[SHAPE_COUNT])
 {
     build_tesseract(&shapes[SHAPE_TESSERACT]);
     build_16cell(&shapes[SHAPE_CELL16]);
     build_simplex5(&shapes[SHAPE_SIMPLEX5]);
+    build_icon_arrow_shape(&shapes[SHAPE_ICON_ARROW]);
+    build_icon_star_shape(&shapes[SHAPE_ICON_STAR]);
+    build_png_sample_shape(&shapes[SHAPE_PNG_ICON]);
+    build_house_w_shape(&shapes[SHAPE_HOUSE_W]);
 }

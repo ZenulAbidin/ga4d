@@ -385,7 +385,8 @@ static void draw_overlay(App *app)
 
     begin_overlay(app);
 
-    snprintf(line, sizeof(line), "GA4D  OBJ:%s  VIEW:%s  BASIS:%s  %s",
+    snprintf(line, sizeof(line), "GA4D %s  OBJ:%s  VIEW:%s  BASIS:%s  %s",
+             GA4D_VERSION,
              ga4d_object_names[app->object],
              ga4d_view_names[app->view],
              ga4d_basis_names[app->basis_mode],
@@ -425,6 +426,13 @@ static void draw_overlay(App *app)
     draw_text_quads(14.0f, y, scale, line, dim);
     y += 22.0f;
 
+    if (app->custom_icon_loaded || app->object == SHAPE_PNG_ICON) {
+        snprintf(line, sizeof(line), "PNG ICON: %.220s",
+                 app->custom_icon_loaded ? app->icon_status : "built-in sample; use --icon path.png");
+        draw_text_quads(14.0f, y, scale, line, dim);
+        y += 22.0f;
+    }
+
     draw_text_quads(14.0f, y, scale,
                     "MOUSE: LEFT ORBIT  RIGHT PAN  WHEEL ZOOM   H HELP",
                     dim);
@@ -445,6 +453,10 @@ static void draw_overlay(App *app)
         y += 20.0f;
         draw_text_quads(14.0f, y, scale,
                         "F1 TESSERACT  F2 DOUBLE ROT  F3 L/R SPLIT  F4 SPHERE  F5 5-CELL",
+                        dim);
+        y += 20.0f;
+        draw_text_quads(14.0f, y, scale,
+                        "F6 ARROW-W  F7 PNG ICON-W  F8 3D HOUSE-W  CLI: --icon FILE.PNG",
                         dim);
     }
 

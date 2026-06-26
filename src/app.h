@@ -11,7 +11,7 @@ typedef struct {
     int width;
     int height;
 
-    Shape shapes[3];
+    Shape shapes[SHAPE_COUNT];
     int object;
     int view;
     int basis_mode;
@@ -45,11 +45,16 @@ typedef struct {
     double last_mouse_y;
     int prev_keys[GLFW_KEY_LAST + 1];
     double title_timer;
+
+    int custom_icon_loaded;
+    char custom_icon_path[GA4D_PATH_MAX];
+    char icon_status[GA4D_STATUS_MAX];
 } App;
 
 void app_defaults(App *app);
 void app_reset_view(App *app);
 void app_apply_preset(App *app, int preset);
+int app_load_png_icon(App *app, const char *path);
 void app_update_rotor(App *app);
 void app_update_animation(App *app, float dt);
 Bivector app_current_bivector(const App *app);
