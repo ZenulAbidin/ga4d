@@ -1,0 +1,12 @@
+--- a/src/wl_init.c
++++ b/src/wl_init.c
+@@ -853,7 +853,8 @@ int _glfwInitWayland(void)
+         }
+     }
+ 
+-    if (wl_seat_get_version(_glfw.wl.seat) >= WL_KEYBOARD_REPEAT_INFO_SINCE_VERSION)
++    if (_glfw.wl.seat &&
++        wl_seat_get_version(_glfw.wl.seat) >= WL_KEYBOARD_REPEAT_INFO_SINCE_VERSION)
+     {
+         _glfw.wl.keyRepeatTimerfd =
+             timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);

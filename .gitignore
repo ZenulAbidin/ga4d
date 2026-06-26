@@ -1,0 +1,8 @@
+.git-local/
+bin/
+build/
+notes
+vendor/glfw/
+vendor/build/
+*.o
+*.d
